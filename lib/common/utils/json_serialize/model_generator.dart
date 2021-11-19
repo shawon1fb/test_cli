@@ -74,6 +74,9 @@ class ModelGenerator {
         if (typeDef.subtype != null && typeDef.subtype == 'Class') {
           typeDef.subtype = camelCase(key);
         }
+        if (typeDef.name == 'Class?') {
+          typeDef.name = '${camelCase(key)}?';
+        }
         if (typeDef.isAmbiguous!) {
           warnings.add(newAmbiguousListWarn('$path/$key'));
         }
@@ -82,8 +85,8 @@ class ModelGenerator {
       final similarClass =
           allClasses.firstWhereOrNull((cd) => cd == classDefinition);
       if (similarClass != null) {
-        final similarClassName = similarClass.name;
-        final currentClassName = classDefinition.name;
+        final similarClassName = '${similarClass.name}?';
+        final currentClassName = '${classDefinition.name}?';
         sameClassMapping[currentClassName] = similarClassName;
       } else {
         allClasses.add(classDefinition);
@@ -139,8 +142,19 @@ class ModelGenerator {
       final fieldsKeys = c.fields.keys;
       for (var f in fieldsKeys) {
         final typeForField = c.fields[f]!;
-        if (sameClassMapping.containsKey(typeForField.name)) {
-          c.fields[f]!.name = sameClassMapping[typeForField.name!];
+        var fieldName = typeForField.name;
+
+        if (sameClassMapping.containsKey(fieldName)) {
+          c.fields[f]!.name = sameClassMapping[fieldName];
+        }
+
+        // check subtype for list
+        if (fieldName == 'List') {
+          fieldName = '${typeForField.subtype}?';
+          if (sameClassMapping.containsKey(fieldName)) {
+            c.fields[f]!.subtype =
+                sameClassMapping[fieldName]!.replaceAll('?', '');
+          }
         }
       }
     }
