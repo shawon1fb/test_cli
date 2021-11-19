@@ -87,6 +87,7 @@ class TypeDefinition {
 
   @override
   int get hashCode => super.hashCode;
+
   @override
   bool operator ==(dynamic other) {
     if (other is TypeDefinition) {
@@ -108,7 +109,10 @@ class TypeDefinition {
     return '$properType.fromJson($expression)';
   }
 
-  String _buildToJsonClass(String expression) {
+  String _buildToJsonClass(String expression, {bool nullSafe = false}) {
+    if (nullSafe == true) {
+      return '$expression?.toJson()';
+    }
     return '$expression.toJson()';
   }
 
@@ -129,7 +133,7 @@ class TypeDefinition {
       // list of class
       return "if (json['$key'] != null) {\n\t\t\t$fieldKey = <$subtype>[];"
           "\n\t\t\tjson['$key'].forEach((v) { "
-          '$fieldKey.add($subtype.fromJson(v)); });\n\t\t}';
+          '$fieldKey?.add($subtype.fromJson(v)); });\n\t\t}';
     } else {
       // class
       return "$fieldKey = json['$key'] != null ?"
@@ -147,12 +151,12 @@ class TypeDefinition {
     } else if (name == 'List') {
       // class list
       return """if ($thisKey != null) {
-      data['$key'] = $thisKey.map((v) => ${_buildToJsonClass('v')}).toList();
+      data['$key'] = $thisKey?.map((v) => ${_buildToJsonClass('v', nullSafe: false)}).toList();
     }""";
     } else {
       // class
       return """if ($thisKey != null) {
-      data['$key'] = ${_buildToJsonClass(thisKey)};
+      data['$key'] = ${_buildToJsonClass(thisKey, nullSafe: true)};
     }""";
     }
   }
@@ -174,7 +178,9 @@ class ClassDefinition {
   final Map<String, TypeDefinition> fields = <String, TypeDefinition>{};
 
   String get name => _name;
+
   bool get privateFields => _privateFields;
+
   bool? get copyConstructor => _withCopyConstructor;
 
   List<Dependency> get dependencies {
