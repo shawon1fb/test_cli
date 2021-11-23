@@ -96,6 +96,7 @@ class ModelGenerator {
             ? '${classDefinition.name}?'
             : classDefinition.name;
 
+
         sameClassMapping[currentClassName] = similarClassName;
       } else {
         allClasses.add(classDefinition);
@@ -159,9 +160,11 @@ class ModelGenerator {
 
         // check subtype for list
         if (fieldName == 'List') {
+
           fieldName = PubspecUtils.nullSafeSupport
               ? '${typeForField.subtype}?'
               : typeForField.subtype;
+
 
           if (sameClassMapping.containsKey(fieldName)) {
             c.fields[f]!.subtype =

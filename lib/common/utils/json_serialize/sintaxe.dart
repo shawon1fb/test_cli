@@ -133,7 +133,9 @@ class TypeDefinition {
       // list of class
       return "if (json['$key'] != null) {\n\t\t\t$fieldKey = <$subtype>[];"
           "\n\t\t\tjson['$key'].forEach((v) { "
+
           '$fieldKey${PubspecUtils.nullSafeSupport ? '?' : ''}.add($subtype.fromJson(v)); });\n\t\t}';
+
     } else {
       // class
       return "$fieldKey = json['$key'] != null ?"
@@ -151,12 +153,16 @@ class TypeDefinition {
     } else if (name == 'List') {
       // class list
       return """if ($thisKey != null) {
+
       data['$key'] = $thisKey${PubspecUtils.nullSafeSupport ? '?' : ''}.map((v) => ${_buildToJsonClass('v', nullSafe: false)}).toList();
+
     }""";
     } else {
       // class
       return """if ($thisKey != null) {
+
       data['$key'] = ${_buildToJsonClass(thisKey, nullSafe: PubspecUtils.nullSafeSupport)};
+
     }""";
     }
   }
